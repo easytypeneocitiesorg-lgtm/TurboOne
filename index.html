@@ -303,7 +303,7 @@
                     Download for Windows
                 </a>
                 <span class="system-req">
-                    Requires Windows 10 or 11 (64-bit) &bull; <span class="download-counter" id="downloadCount">Loading...</span> downloads globally
+                    Requires Windows 10 or 11 (64-bit) &bull; <span class="download-counter" id="downloadCount">0</span> downloads globally
                 </span>
             </div>
 
@@ -338,11 +338,6 @@
     </footer>
 
     <script>
-        // Using JSONBin.io (or similar free key-value store logic template) 
-        // For a seamless setup on Vercel without a dedicated backend server, 
-        // you can point this to a free service like CountAPI or JSONBin. 
-        // Here we use CountAPI (api.countapi.xyz) which is completely free and requires zero configuration.
-        
         const namespace = "turboone-downloads-v1";
         const key = "downloads";
         const countElement = document.getElementById("downloadCount");
@@ -355,8 +350,7 @@
                 let data = await response.json();
                 countElement.textContent = data.value.toLocaleString();
             } catch (error) {
-                // Fallback if API fails
-                countElement.textContent = "14,820";
+                countElement.textContent = "0";
             }
         }
 
@@ -367,8 +361,7 @@
                 let data = await response.json();
                 countElement.textContent = data.value.toLocaleString();
             } catch (error) {
-                // Fallback local increment if API fails
-                let current = parseInt(countElement.textContent.replace(/,/g, '')) || 14820;
+                let current = parseInt(countElement.textContent.replace(/,/g, '')) || 0;
                 countElement.textContent = (current + 1).toLocaleString();
             }
         });
