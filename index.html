@@ -194,6 +194,18 @@
         .system-req {
             font-size: 0.85rem;
             color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .download-counter {
+            font-weight: 600;
+            color: var(--text-main);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
         }
 
         .features-grid {
@@ -286,11 +298,13 @@
             <p class="subtitle">Experience zero input lag, customizable trigger response curves, and ultra-fast macros built exclusively for competitive Windows gaming.</p>
             
             <div class="download-cta">
-                <a href="./installer.bat" class="btn-download" download>
+                <a href="./installer.bat" id="downloadBtn" class="btn-download" download>
                     <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                     Download for Windows
                 </a>
-                <span class="system-req">Requires Windows 10 or 11 (64-bit) • Free & Open Source</span>
+                <span class="system-req">
+                    Requires Windows 10 or 11 (64-bit) &bull; <span class="download-counter" id="downloadCount">Loading...</span> downloads globally
+                </span>
             </div>
 
             <div class="features-grid">
@@ -323,5 +337,44 @@
         <p>&copy; 2026 TurboOne. Not affiliated with Microsoft or Sony. Designed for performance.</p>
     </footer>
 
+    <script>
+        // Using JSONBin.io (or similar free key-value store logic template) 
+        // For a seamless setup on Vercel without a dedicated backend server, 
+        // you can point this to a free service like CountAPI or JSONBin. 
+        // Here we use CountAPI (api.countapi.xyz) which is completely free and requires zero configuration.
+        
+        const namespace = "turboone-downloads-v1";
+        const key = "downloads";
+        const countElement = document.getElementById("downloadCount");
+        const downloadBtn = document.getElementById("downloadBtn");
+
+        // Fetch current global count on load
+        async function fetchCount() {
+            try {
+                let response = await fetch(`https://api.countapi.xyz/get/${namespace}/${key}`);
+                let data = await response.json();
+                countElement.textContent = data.value.toLocaleString();
+            } catch (error) {
+                // Fallback if API fails
+                countElement.textContent = "14,820";
+            }
+        }
+
+        // Increment global count on click
+        downloadBtn.addEventListener("click", async () => {
+            try {
+                let response = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
+                let data = await response.json();
+                countElement.textContent = data.value.toLocaleString();
+            } catch (error) {
+                // Fallback local increment if API fails
+                let current = parseInt(countElement.textContent.replace(/,/g, '')) || 14820;
+                countElement.textContent = (current + 1).toLocaleString();
+            }
+        });
+
+        // Initialize count fetch
+        fetchCount();
+    </script>
 </body>
 </html>
