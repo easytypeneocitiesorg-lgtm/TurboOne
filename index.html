@@ -303,7 +303,7 @@
                     Download for Windows
                 </a>
                 <span class="system-req">
-                    Requires Windows 10 or 11 (64-bit) &bull; <span class="download-counter" id="downloadCount">0</span> downloads globally
+                    Requires Windows 10 or 11 (64-bit) &bull; <span class="download-counter" id="downloadCount">Loading...</span> downloads globally
                 </span>
             </div>
 
@@ -337,36 +337,65 @@
         <p>&copy; 2026 TurboOne. Not affiliated with Microsoft or Sony. Designed for performance.</p>
     </footer>
 
-    <script>
-        const namespace = "turboone-downloads-v1";
-        const key = "downloads";
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyADnF-bw_JoUrctnQ9Gj_Dl3tnKlnYwaYc",
+            authDomain: "turboonedcounter.firebaseapp.com",
+            projectId: "turboonedcounter",
+            storageBucket: "turboonedcounter.firebasestorage.app",
+            messagingSenderId: "34482738328",
+            appId: "1:34482738328:web:72141a534f083011e4eced",
+            measurementId: "G-68P7F6QWQK"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
         const countElement = document.getElementById("downloadCount");
         const downloadBtn = document.getElementById("downloadBtn");
 
-        // Fetch current global count on load
+        // Reference to your counter document (e.g., collection: "stats", document: "downloads")
+        const statsRef = doc(db, "stats", "downloads");
+
+        // Fetch live global count on page load
         async function fetchCount() {
             try {
-                let response = await fetch(`https://api.countapi.xyz/get/${namespace}/${key}`);
-                let data = await response.json();
-                countElement.textContent = data.value.toLocaleString();
+                const docSnap = await getDoc(statsRef);
+                if (docSnap.exists()) {
+                    countElement.textContent = (docSnap.data().count || 0).toLocaleString();
+                } else {
+                    countElement.textContent = "0";
+                }
             } catch (error) {
+                console.error("Error fetching count:", error);
                 countElement.textContent = "0";
             }
         }
 
-        // Increment global count on click
+        // Increment globally on click using Firebase atomic increment
         downloadBtn.addEventListener("click", async () => {
             try {
-                let response = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
-                let data = await response.json();
-                countElement.textContent = data.value.toLocaleString();
+                await updateDoc(statsRef, {
+                    count: increment(1)
+                });
+                // Fetch updated count right after incrementing
+                const docSnap = await getDoc(statsRef);
+                if (docSnap.exists()) {
+                    countElement.textContent = (docSnap.data().count || 0).toLocaleString();
+                }
             } catch (error) {
+                console.error("Error updating count:", error);
+                // Fallback local visual update if network blocks it
                 let current = parseInt(countElement.textContent.replace(/,/g, '')) || 0;
                 countElement.textContent = (current + 1).toLocaleString();
             }
         });
 
-        // Initialize count fetch
         fetchCount();
     </script>
 </body>
